@@ -75,7 +75,7 @@ def refresh_devices():
         apps = []
         for name, bundle in get_dev_apps(dev).items():
             apps.append(App(name, bundle))
-        g.devs.append(Device(dev, dev.name, dev.udid, apps))
+        devs.append(Device(dev, dev.name, dev.udid, apps))
     return "Refreshed!"
 
 @app.route("/<device>/")
@@ -135,4 +135,4 @@ if __name__ == '__main__':
             apps.append(App(name, bundle))
         devs.append(Device(dev, dev.name, dev.udid, apps))
 
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)
