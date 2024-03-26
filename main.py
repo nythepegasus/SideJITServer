@@ -7,6 +7,8 @@ from pymobiledevice3.services.dvt.instruments.process_control import ProcessCont
 from pymobiledevice3.services.dvt.dvt_secure_socket_proxy import DvtSecureSocketProxyService
 
 
+import socket
+
 app = Flask(__name__)
 
 devs = []
@@ -56,9 +58,33 @@ def enable_jit(device, app: str):
 
     pid = launch_app(device, app)
 
-    p = Popen(['lldb'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-    _, _ = p.communicate(input=f'settings set interpreter.require-overwrite false\ncommand script import ./enable_jit.py\nenable_jit [{debugserver_host}]:{debugserver_port} {pid}\n'.encode())
-    p.kill()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    debugserver_address = (debugserver_host, debugserver_port)
+    print("Connecting to " + str(debugserver_address))
+    s.connect(debugserver_address)
+
+    s.sendall('$QStartNoAckMode#b0'.encode())
+    print("StartNoAckMode: " + s.recv(1024).decode())
+
+    s.sendall('$QSetDetachOnError:1#f8'.encode())
+    print("SetDetachOnError: " + s.recv(1024).decode())
+
+    print(f"Attaching to process {pid}..")
+    pid_hex = format(int(sys.argv[1]), 'x')
+    s.sendall(f'$vAttach;{pid_hex}#38'.encode())
+    print("Attach: " + s.recv(1024).decode())
+
+    if out.startswith('$T11thread'):
+        s.sendall('$D#44'.encode())
+        if s.recv(1024).decode() == '$OK#00':
+            print("\nProcess continued and detached!")
+            print(f"JIT enabled for process {pid} at {debugserver_address}!")
+        else:
+            print(f"Failed to detach process {pid}")
+    else:
+        print(f"Failed to attach process {pid}")
+
+    s.close()
     return pid
 
 
