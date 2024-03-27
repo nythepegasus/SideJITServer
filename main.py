@@ -1,13 +1,14 @@
+import socket
 from flask import Flask
-from subprocess import Popen, PIPE
 
 from pymobiledevice3.tunneld import get_tunneld_devices
+from pymobiledevice3.exceptions import AlreadyMountedError
 from pymobiledevice3.services.installation_proxy import InstallationProxyService
+from pymobiledevice3.services.mobile_image_mounter import auto_mount_personalized
 from pymobiledevice3.services.dvt.instruments.process_control import ProcessControl
 from pymobiledevice3.services.dvt.dvt_secure_socket_proxy import DvtSecureSocketProxyService
 
 
-import socket
 
 app = Flask(__name__)
 
@@ -17,6 +18,10 @@ def refresh_devs():
     global devs
     devs = []
     for dev in get_tunneld_devices():
+        try:
+            auto_mount_personalized(dev)
+        except AlreadyMountedError:
+            pass
         apps = []
         for name, bundle in get_dev_apps(dev).items():
             apps.append(App(name, bundle))
