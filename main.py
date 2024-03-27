@@ -1,14 +1,21 @@
+import atexit
 import socket
+import multiprocessing
+from time import sleep
 from flask import Flask
 
-from pymobiledevice3.tunneld import get_tunneld_devices
+from pymobiledevice3.remote.common import TunnelProtocol
 from pymobiledevice3.exceptions import AlreadyMountedError
 from pymobiledevice3.services.installation_proxy import InstallationProxyService
 from pymobiledevice3.services.mobile_image_mounter import auto_mount_personalized
 from pymobiledevice3.services.dvt.instruments.process_control import ProcessControl
 from pymobiledevice3.services.dvt.dvt_secure_socket_proxy import DvtSecureSocketProxyService
+from pymobiledevice3.tunneld import get_tunneld_devices, TUNNELD_DEFAULT_ADDRESS, TunneldRunner
 
 
+def start_tunneld_proc():
+    TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
+                         protocol=TunnelProtocol('quic'), usb_monitor=True, wifi_monitor=True)
 
 app = Flask(__name__)
 
@@ -164,7 +171,16 @@ def enable_jit_for_app(device, name):
 
 
 if __name__ == '__main__':
+    tunneld = multiprocessing.Process(target=start_tunneld_proc)
+    tunneld.start()
+
+    @atexit.register
+    def close_tunneld():
+        tunneld.terminate()
+
+    sleep(10)
+
     refresh_devs()
 
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080)
 
