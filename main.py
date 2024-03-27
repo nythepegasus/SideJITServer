@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask
 from subprocess import Popen, PIPE
 
 from pymobiledevice3.tunneld import get_tunneld_devices
@@ -12,7 +12,23 @@ import socket
 app = Flask(__name__)
 
 devs = []
-apps = {}
+
+def refresh_devs():
+    global devs
+    devs = []
+    for dev in get_tunneld_devices():
+        apps = []
+        for name, bundle in get_dev_apps(dev).items():
+            apps.append(App(name, bundle))
+        devs.append(Device(dev, dev.name, dev.udid, apps))
+
+def get_device(udid: str):
+    global devs
+    d = [d for d in devs if d.udid == udid]
+    if len(d) != 1:
+        return
+    return d[0]
+
 
 class App:
     def __init__(self, name: str, bundle: str, pid: int = -1):
@@ -49,7 +65,7 @@ def launch_app(device, bundle_id: str):
     with DvtSecureSocketProxyService(lockdown=device) as dvt:
         process_control = ProcessControl(dvt)
         pid = process_control.launch(bundle_id=bundle_id, arguments={},
-                                     kill_existing=False, start_suspended=False,
+                                     kill_existing=True, start_suspended=True,
                                      environment={})
         return pid
 
@@ -95,70 +111,54 @@ def devices():
 
 @app.route("/re")
 def refresh_devices():
-    global devs
-    devs = []
-    for dev in get_tunneld_devices():
-        apps = []
-        for name, bundle in get_dev_apps(dev).items():
-            apps.append(App(name, bundle))
-        devs.append(Device(dev, dev.name, dev.udid, apps))
+    refresh_devs()
     return "Refreshed!"
 
 @app.route("/<device>/")
 def get_apps(device):
-    global devs
-    dev = [d for d in devs if d.udid == device]
-    if len(dev) != 1:
-        return "Could not find device!"
-    dev = dev[0]
-    return [a.asdict() for a in dev.apps]
+    dev = get_device(device)
+    if dev:
+        return [a.asdict() for a in dev.apps]
+    return "Could not find device!"
 
 @app.route("/<device>/re")
 def refresh_apps(device):
-    global devs
-    dev = [d for d in devs if d.udid == device]
-    if len(dev) != 1:
-        return "Could not find device!"
-    dev = dev[0]
-    apps = []
-    for name, bundle in get_dev_apps(dev.handle).items():
-        apps.append(App(name, bundle))
-    dev.apps = apps
-    return "Refreshed app list!"
+    dev = get_device(device)
+    if dev:
+        apps = []
+        for name, bundle in get_dev_apps(dev.handle).items():
+            apps.append(App(name, bundle))
+        dev.apps = apps
+        return "Refreshed app list!"
+    return "Could not find device!"
 
 @app.route("/<device>/<name>")
 def enable_jit_for_app(device, name):
-    global devs
-    dev = [d for d in devs if d.udid == device]
-    if len(dev) != 1:
-        return "Could not find device!"
-    dev = dev[0]
-    app = [a for a in dev.apps if a.name == name]
-    bundles = [a for a in dev.apps if a.bundle == name]
-    if len(app) != 1 and len(bundles) != 1:
-        return f"Could not find {app!r}"
-    if len(app) == 1:
-        app = app[0]
-    else:
-        app = bundles[0]
+    dev = get_device(device)
+    if dev:
+        app = [a for a in dev.apps if a.name == name]
+        bundles = [a for a in dev.apps if a.bundle == name]
+        if len(app) != 1 and len(bundles) != 1:
+            return f"Could not find {app!r}"
+        if len(app) == 1:
+            app = app[0]
+        else:
+            app = bundles[0]
 
-    if app.pid == -1:
-        app.pid = enable_jit(dev.handle, app.bundle)
-    else:
-        pid = launch_app(dev.handle, app.bundle)
-        if pid != app.pid:
+        if app.pid == -1:
             app.pid = enable_jit(dev.handle, app.bundle)
         else:
-            return f"JIT already enabled for {app.name!r}!"
-
-    return f"Enabled JIT for {app.name!r}!"
+            pid = launch_app(dev.handle, app.bundle)
+            if pid != app.pid:
+                app.pid = enable_jit(dev.handle, app.bundle)
+            else:
+                return f"JIT already enabled for {app.name!r}!"
+        return f"Enabled JIT for {app.name!r}!"
+    return "Could not find device!"
 
 
 if __name__ == '__main__':
-    for dev in get_tunneld_devices():
-        apps = []
-        for name, bundle in get_dev_apps(dev).items():
-            apps.append(App(name, bundle))
-        devs.append(Device(dev, dev.name, dev.udid, apps))
+    refresh_devs()
 
     app.run(host='0.0.0.0', port=8080, debug=True)
+
