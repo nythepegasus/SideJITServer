@@ -58,7 +58,7 @@ def enable_jit(device, app: str):
 
     pid = launch_app(device, app)
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     debugserver_address = (debugserver_host, debugserver_port)
     print("Connecting to " + str(debugserver_address))
     s.connect(debugserver_address)
