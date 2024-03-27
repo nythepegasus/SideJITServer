@@ -174,9 +174,7 @@ if __name__ == '__main__':
     tunneld = multiprocessing.Process(target=start_tunneld_proc)
     tunneld.start()
 
-    @atexit.register
-    def close_tunneld():
-        tunneld.terminate()
+    atexit.register(tunneld.terminate)
 
     sleep(10)
 
