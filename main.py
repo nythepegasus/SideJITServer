@@ -61,18 +61,18 @@ def get_dev_apps(device):
     return {apps[app]['CFBundleDisplayName']: app for app in apps if 'Entitlements' in apps[app] and 'get-task-allow' in apps[app]['Entitlements'] and apps[app]['Entitlements']['get-task-allow']}
 
 
-def launch_app(device, bundle_id: str):
+def launch_app(device, bundle_id: str, sus: bool = False):
     with DvtSecureSocketProxyService(lockdown=device) as dvt:
         process_control = ProcessControl(dvt)
         pid = process_control.launch(bundle_id=bundle_id, arguments={},
-                                     kill_existing=True, start_suspended=True,
+                                     kill_existing=False, start_suspended=sus,
                                      environment={})
         return pid
 
 def enable_jit(device, app: str):
     debugserver_host, debugserver_port = device.service.address[0], device.get_service_port('com.apple.internal.dt.remote.debugproxy')
 
-    pid = launch_app(device, app)
+    pid = launch_app(device, app, True)
 
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     debugserver_address = (debugserver_host, debugserver_port)
@@ -86,9 +86,10 @@ def enable_jit(device, app: str):
     print("SetDetachOnError: " + s.recv(1024).decode())
 
     print(f"Attaching to process {pid}..")
-    pid_hex = format(int(sys.argv[1]), 'x')
+    pid_hex = format(pid, 'x')
     s.sendall(f'$vAttach;{pid_hex}#38'.encode())
-    print("Attach: " + s.recv(1024).decode())
+    out = s.recv(1024).decode()
+    print("Attach: " + out)
 
     if out.startswith('$T11thread'):
         s.sendall('$D#44'.encode())
