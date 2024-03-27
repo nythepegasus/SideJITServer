@@ -1,5 +1,7 @@
 import atexit
+import click
 import socket
+import logging
 import multiprocessing
 from time import sleep
 from flask import Flask
@@ -16,6 +18,7 @@ from pymobiledevice3.tunneld import get_tunneld_devices, TUNNELD_DEFAULT_ADDRESS
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
                          protocol=TunnelProtocol('quic'), usb_monitor=True, wifi_monitor=True)
+
 
 app = Flask(__name__)
 
@@ -82,36 +85,35 @@ def launch_app(device, bundle_id: str, sus: bool = False):
         return pid
 
 def enable_jit(device, app: str):
-    debugserver_host, debugserver_port = device.service.address[0], device.get_service_port('com.apple.internal.dt.remote.debugproxy')
+    debugserver = (host, port) = device.service.address[0], device.get_service_port('com.apple.internal.dt.remote.debugproxy')
 
     pid = launch_app(device, app, True)
 
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-    debugserver_address = (debugserver_host, debugserver_port)
-    print("Connecting to " + str(debugserver_address))
-    s.connect(debugserver_address)
+    logging.info(f"Connecting to [{host}]:{port}")
+    s.connect(debugserver)
 
-    s.sendall('$QStartNoAckMode#b0'.encode())
-    print("StartNoAckMode: " + s.recv(1024).decode())
+    s.sendall(b'$QStartNoAckMode#b0')
+    logging.info(f"StartNoAckMode: {s.recv(4).decode()}")
 
-    s.sendall('$QSetDetachOnError:1#f8'.encode())
-    print("SetDetachOnError: " + s.recv(1024).decode())
+    s.sendall(b'$QSetDetachOnError:1#f8')
+    logging.info(f"SetDetachOnError: {s.recv(8).decode()}")
 
-    print(f"Attaching to process {pid}..")
-    pid_hex = format(pid, 'x')
-    s.sendall(f'$vAttach;{pid_hex}#38'.encode())
-    out = s.recv(1024).decode()
-    print("Attach: " + out)
+    logging.info(f"Attaching to process {pid}..")
+    s.sendall(f'$vAttach;{pid:x}#38'.encode())
+    out = s.recv(16).decode()
+    logging.info(f"Attach: {out}")
 
-    if out.startswith('$T11thread'):
-        s.sendall('$D#44'.encode())
-        if s.recv(1024).decode() == '$OK#00':
-            print("\nProcess continued and detached!")
-            print(f"JIT enabled for process {pid} at {debugserver_address}!")
+    if out.startswith('$T11thread') or '+' in out:
+        s.sendall(b'$D#44')
+        new = s.recv(16)
+        if any(x in new for x in (b'$T11thread', b'$OK#00', b'+')):
+            logging.info("Process continued and detached!")
+            logging.info(f"JIT enabled for process {pid} at [{host}]:{port}!")
         else:
-            print(f"Failed to detach process {pid}")
+            logging.info(f"Failed to detach process {pid}")
     else:
-        print(f"Failed to attach process {pid}")
+        logging.info(f"Failed to attach process {pid}")
 
     s.close()
     return pid
@@ -169,8 +171,16 @@ def enable_jit_for_app(device, name):
         return f"Enabled JIT for {app.name!r}!"
     return "Could not find device!"
 
+logging.basicConfig(level=logging.WARNING)
 
-if __name__ == '__main__':
+@click.command()
+@click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
+@click.option('-p', '--port', default=8080, help='Set the server port')
+def start_server(verbose, port):
+    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
+    verbosity_level = min(len(log_levels) - 1, verbose)
+    logging.getLogger().setLevel(log_levels[verbosity_level])
+
     tunneld = multiprocessing.Process(target=start_tunneld_proc)
     tunneld.start()
 
@@ -180,5 +190,7 @@ if __name__ == '__main__':
 
     refresh_devs()
 
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=port)
 
+if __name__ == '__main__':
+    start_server()
