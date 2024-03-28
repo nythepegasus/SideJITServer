@@ -182,4 +182,5 @@ def start_server(verbose, timeout, port, debug):
 
     app.run(host='0.0.0.0', port=port, debug=debug)
 
-start_server()
+if __name__ == '__main__':
+    start_server()
