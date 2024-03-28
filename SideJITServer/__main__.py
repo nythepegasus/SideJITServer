@@ -88,7 +88,7 @@ class Device:
         s.sendall(b'$QSetDetachOnError:1#f8')
         logging.info(f"SetDetachOnError: {s.recv(8).decode()}")
 
-        logging.info(f"Attaching to process {pid}..")
+        logging.info(f"Attaching to process {app.pid}..")
         s.sendall(f'$vAttach;{app.pid:x}#38'.encode())
         out = s.recv(16).decode()
         logging.info(f"Attach: {out}")
@@ -98,11 +98,11 @@ class Device:
             new = s.recv(16)
             if any(x in new for x in (b'$T11thread', b'$OK#00', b'+')):
                 logging.info("Process continued and detached!")
-                logging.info(f"JIT enabled for process {pid} at [{host}]:{port}!")
+                logging.info(f"JIT enabled for process {app.pid} at [{host}]:{port}!")
             else:
-                logging.info(f"Failed to detach process {pid}")
+                logging.info(f"Failed to detach process {app.pid}")
         else:
-            logging.info(f"Failed to attach process {pid}")
+            logging.info(f"Failed to attach process {app.pid}")
 
         s.close()
         return f"Enabled JIT for {app.name!r}!"
