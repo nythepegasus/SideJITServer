@@ -1,0 +1,52 @@
+[project]
+name = "SideJITServer"
+authors = [
+  { name="nythepegasus", email="me@nythepegas.us" },
+  { name="khanhduytran0" },
+  { name="JoeMatt", email="git@joemattiello.com" },
+]
+maintainers = [
+  { name="nythepegasus", email="me@nythepegas.us" },
+]
+description = "SideJITServer is an iOS 17 JIT enabler for Windows/macOS!"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["ios", "automation", "cli", "jit"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: iOS :: iOS 17",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dynamic = ["dependencies", "version"]
+
+[project.optional-dependencies]
+dev = ["build", "pylint"]
+
+[project.urls]
+"Homepage" = "https://github.com/nythepegasus/SideJITServer"
+"Bug Reports" = "https://github.com/nythepegasus/SideJITServer/issues"
+
+[project.scripts]
+SideJITServer = "SideJITServer.__main__:start_server"
+
+[tool.setuptools]
+package-data = { "SideJITServer" = [] }
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+version = {attr = "SideJITServer._version.__version__"}
+
+[tool.setuptools_scm]
+version_file = "SideJITServer/_version.py"
+
+[build-system]
+requires = ["setuptools>=43.0.0", "setuptools_scm>=8", "wheel"]
+build-backend = "setuptools.build_meta"
