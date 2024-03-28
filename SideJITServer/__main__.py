@@ -76,7 +76,7 @@ class Device:
         (host, port) = \
         self.handle.service.address[0], self.handle.get_service_port('com.apple.internal.dt.remote.debugproxy')
 
-        pid = self.launch_app(app.bundle, True)
+        app.pid = self.launch_app(app.bundle, True)
 
         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         logging.info(f"Connecting to [{host}]:{port}")
@@ -89,7 +89,7 @@ class Device:
         logging.info(f"SetDetachOnError: {s.recv(8).decode()}")
 
         logging.info(f"Attaching to process {pid}..")
-        s.sendall(f'$vAttach;{pid:x}#38'.encode())
+        s.sendall(f'$vAttach;{app.pid:x}#38'.encode())
         out = s.recv(16).decode()
         logging.info(f"Attach: {out}")
 
