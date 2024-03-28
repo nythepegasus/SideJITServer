@@ -7,7 +7,7 @@ To get it going: (run this in an admin terminal if you're on Windows)
 python3 -m venv venv
 
 # If you're on macOS/Linux
-. .venv/bin/activate
+. ./venv/bin/activate
 # If you're on Windows using PowerShell
 .\venv\Scripts\Activate.ps1
 # CMD
