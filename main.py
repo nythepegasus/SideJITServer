@@ -2,12 +2,15 @@ import atexit
 import click
 import socket
 import logging
+import inquirer3
 import multiprocessing
 from time import sleep
 from flask import Flask
 
 from pymobiledevice3.remote.common import TunnelProtocol
 from pymobiledevice3.exceptions import AlreadyMountedError
+from pymobiledevice3.usbmux import select_devices_by_connection_type
+from pymobiledevice3.lockdown import LockdownClient, create_using_usbmux
 from pymobiledevice3.services.installation_proxy import InstallationProxyService
 from pymobiledevice3.services.mobile_image_mounter import auto_mount_personalized
 from pymobiledevice3.services.dvt.instruments.process_control import ProcessControl
@@ -161,12 +164,40 @@ def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
                          protocol=TunnelProtocol('quic'), usb_monitor=True, wifi_monitor=True)
 
+def prompt_device_list(device_list: list):
+    device_question = [inquirer3.List('device', message='choose device', choices=device_list, carousel=True)]
+    try:
+        result = inquirer3.prompt(device_question, raise_keyboard_interrupt=True)
+        return result['device']
+    except KeyboardInterrupt:
+        raise Exception()
+
 @click.command()
-@click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
-@click.option('-t', '--timeout', default=10, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-p', '--port', default=8080, help='Set the server port')
 @click.option('-d', '--debug', is_flag=True, default=False, help='Enables debug output of the flask server')
-def start_server(verbose, timeout, port, debug):
+@click.option('-t', '--timeout', default=10, help='The number of seconds to wait for the pymd3 admin tunnel')
+@click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
+@click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
+def start_server(verbose, timeout, port, debug, pair):
+    if pair:
+        click.echo("Attempting to pair to a device! (Ctrl+C to stop)")
+        devices = select_devices_by_connection_type(connection_type='USB')
+        while len(devices) == 0:
+            devices = select_devices_by_connection_type(connection_type='USB')
+            click.echo("No devices..")
+            sleep(3)
+
+        create_using_usbmux()
+        devices = [create_using_usbmux(serial=device.serial, autopair=False) for device in devices]
+        print(devices)
+        if len(devices) > 1:
+            dev = prompt_device_list(devices)
+        else:
+            dev = devices[0]
+        dev.pair()
+        if "y" not in input("Continue? [y/N]: ").lower():
+            return
+
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     verbosity_level = min(len(log_levels) - 1, verbose)
     logging.getLogger().setLevel(log_levels[verbosity_level])
