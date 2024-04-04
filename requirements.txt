@@ -1,2 +1,2 @@
-pymobiledevice3>=3.1.0,<3.2.0
+pymobiledevice3>=3.0.3,<3.1.0
 Flask==3.0.2
