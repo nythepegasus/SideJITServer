@@ -182,7 +182,8 @@ def prompt_device_list(device_list: list):
 @click.option('-t', '--timeout', default=10, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
 @click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
-def start_server(verbose, timeout, port, debug, pair, version):
+@click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
+def start_server(verbose, timeout, port, debug, pair, version, tunnel):
     if version:
         click.echo(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
         return
@@ -210,12 +211,13 @@ def start_server(verbose, timeout, port, debug, pair, version):
     verbosity_level = min(len(log_levels) - 1, verbose)
     logging.getLogger().setLevel(log_levels[verbosity_level])
 
-    tunneld = multiprocessing.Process(target=start_tunneld_proc)
-    tunneld.start()
+    if not tunnel:
+        tunneld = multiprocessing.Process(target=start_tunneld_proc)
+        tunneld.start()
 
-    atexit.register(tunneld.terminate)
+        atexit.register(tunneld.terminate)
 
-    sleep(timeout)
+        sleep(timeout)
 
     refresh_devs()
 
