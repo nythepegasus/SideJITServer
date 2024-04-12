@@ -136,6 +136,10 @@ def devices():
         return {"ERROR": "Could not find any device!"}
     return {d.name: d.udid for d in devs}
 
+@app.route("/ver/")
+def route_version():
+    return {"pymobiledevice3": pymd_ver, "SideJITServer": __version__}
+
 @app.route("/re/")
 def refresh_devices():
     refresh_devs()
