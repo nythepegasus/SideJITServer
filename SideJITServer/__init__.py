@@ -188,7 +188,7 @@ def create_service(port=8080):
     s.close()
 
     # Create a unique service name
-    service_name = "SideJITServer._http._tcp.local"
+    service_name = "SideJITServer._http._tcp.local."
     service_info = ServiceInfo(
         "_http._tcp.local.",
         service_name,
