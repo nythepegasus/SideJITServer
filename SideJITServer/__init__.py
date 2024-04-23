@@ -6,6 +6,7 @@ import inquirer3
 import multiprocessing
 from time import sleep
 from flask import Flask
+from zeroconf import ServiceInfo, Zeroconf
 
 from pymobiledevice3.remote.common import TunnelProtocol
 from pymobiledevice3.exceptions import AlreadyMountedError
@@ -179,6 +180,31 @@ def prompt_device_list(device_list: list):
     except KeyboardInterrupt:
         raise Exception()
 
+def create_service(port=8080):
+    # Get local IP address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_address = s.getsockname()[0]
+    s.close()
+
+    # Create a unique service name
+    service_name = "SideJITServer._http._tcp.local"
+    service_info = ServiceInfo(
+        "_http._tcp.local.",
+        service_name,
+        addresses=[socket.inet_aton(ip_address)],
+        port=port,
+        properties={'path': '/SideJITServer/'},
+    )
+
+    zeroconf = Zeroconf()
+    print(f"Registration of service {service_name} in progress...")
+    zeroconf.register_service(service_info)
+    print(f"Service {service_name} registered")
+
+    atexit.register(zeroconf.unregister_service, service_info)
+    atexit.register(zeroconf.close)
+
 @click.command()
 @click.option('-p', '--port', default=8080, help='Set the server port')
 @click.option('-e', '--version', is_flag=True, default=False, help='Prints the versions of pymobiledevice3 and SideJITServer')
@@ -214,7 +240,6 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     verbosity_level = min(len(log_levels) - 1, verbose)
     logging.getLogger().setLevel(log_levels[verbosity_level])
-
     if not tunnel:
         tunneld = multiprocessing.Process(target=start_tunneld_proc)
         tunneld.start()
@@ -225,4 +250,5 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
 
     refresh_devs()
 
+    create_service()
     app.run(host='0.0.0.0', port=port, debug=debug)
