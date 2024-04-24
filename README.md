@@ -1,5 +1,5 @@
 # SideJITServer
-This project allows you to start a server that wirelessly gives you JIT for iOS 17+ on Windows/macOS. Linux support depends on a [kernel patch](https://github.com/doronz88/pymobiledevice3/issues/566#issuecomment-1850486679).
+This project allows you to start a server that wirelessly gives you JIT for iOS 17+ on Windows/macOS/Linux if you use the correct newer pymobiledevice3 version.
 
 
 To get it going: (run this in an admin terminal if you're on Windows)
@@ -17,7 +17,7 @@ python3 -m venv venv
 pip3 install -r requirements.txt
 # Windows
 .\venv\Scripts\python3.exe main.py
-# macOS
+# macOS/Linux
 sudo python3 -m SideJITServer --help
 ```
 
