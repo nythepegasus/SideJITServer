@@ -1,5 +1,5 @@
 # SideJITServer
-This project allows you to start a server that wirelessly gives you JIT for iOS 17+ on Windows/macOS/Linux if you use the correct newer pymobiledevice3 version.
+This project allows you to start a server that wirelessly or via USB gives you JIT for iOS 17+ on Windows/macOS/Linux if you use the correct newer pymobiledevice3 version.
 
 
 To get it going: (run this in an admin terminal if you're on Windows)
