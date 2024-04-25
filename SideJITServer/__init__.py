@@ -3,6 +3,10 @@ import click
 import socket
 import logging
 import inquirer3
+import threading
+import signal
+import sys
+import os
 import multiprocessing
 from time import sleep
 from flask import Flask
@@ -32,7 +36,7 @@ class App:
 
     def __init__(self, name: str, bundle: str, pid: int = -1):
         self.name = name
-        self.bundle = bundle 
+        self.bundle = bundle
         self.pid = pid
 
     def __repr__(self):
@@ -180,6 +184,7 @@ def prompt_device_list(device_list: list):
     except KeyboardInterrupt:
         raise Exception()
 
+
 def create_service(port=8080):
     # Get local IP address
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -202,8 +207,51 @@ def create_service(port=8080):
     zeroconf.register_service(service_info)
     print(f"Service {service_name} registered")
 
-    atexit.register(zeroconf.unregister_service, service_info)
-    atexit.register(zeroconf.close)
+def stop_service():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_address = s.getsockname()[0]
+    s.close()
+
+    # Create a unique service name
+    service_name = "SideJITServer._http._tcp.local."
+    service_info = ServiceInfo(
+        "_http._tcp.local.",
+        service_name,
+        addresses=[socket.inet_aton(ip_address)],
+        port=8080,
+        properties={'path': '/SideJITServer/'},
+    )
+    zeroconf = Zeroconf()
+    # Make sure to check if service_info is not None before trying to use it
+    if service_info is not None:
+        print(f"Unregistering service {service_info.name}...")
+        zeroconf.unregister_service(service_info)
+        print(f"Service {service_info.name} unregistered")
+        sys.exit()
+    else:
+        print("Service not found.")
+        sys.exit()
+
+    
+def console():
+    while True:
+        command = input("> ")
+        
+        if command == "help":
+            print("Available commands: help, ver")
+        elif command == "ver":
+            print(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
+        else:
+            print(f"Unknown command: {command}")
+
+def signal_handler(sig, frame):
+    console_thread1 = threading.Thread(target=stop_service)
+    console_thread1.start()
+    console_thread1.join()
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 @click.command()
 @click.option('-p', '--port', default=8080, help='Set the server port')
@@ -249,6 +297,12 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
         sleep(timeout)
 
     refresh_devs()
+    
+    # Start the console in a separate thread
+    console_thread = threading.Thread(target=console)
+    console_thread.start()
 
     create_service()
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+
