@@ -261,6 +261,7 @@ signal.signal(signal.SIGINT, signal_handler)
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
 @click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
 @click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
+@click.option('-nz', '--nozeroconf', is_flag=True, default=False, help='this will not launch zeroconf so there will be no Auto IP')
 def start_server(verbose, timeout, port, debug, pair, version, tunnel):
     if version:
         click.echo(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
@@ -295,6 +296,8 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
         atexit.register(tunneld.terminate)
 
         sleep(timeout)
+    if not nozeroconf:
+        create_service()
 
     refresh_devs()
     
@@ -302,7 +305,6 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
     console_thread = threading.Thread(target=console)
     console_thread.start()
 
-    create_service()
     app.run(host='0.0.0.0', port=port, debug=debug)
 
 
