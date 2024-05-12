@@ -40,12 +40,12 @@ SideJITServer --help
 - Make sure you're still inside the venv!
 - Common Knowledge
   
-Now run `SideJITServer --pair` and on your compooter make sure you click on Trust this compooter!
+Now run `SideJITServer --pair` and on your PC make sure you click on Trust this PC!
 Also it will show you a prompt to continue just type "y"
 
 Now thats done, Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) shortcut
 
-After that its gonna ask you to put on your device's UDID, Go to your compooter and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one that beside usbmux (example : 00001111-000A1100A11101A)
+After that its gonna ask you to put on your device's UDID, Go to your PC and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one that beside usbmux (example : 00001111-000A1100A11101A)
 
 Now it's gonna ask you for SideJIT Server address! Just type in the address you use earlier to access device's UDID
 
