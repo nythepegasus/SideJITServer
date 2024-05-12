@@ -47,19 +47,13 @@ Now thats done, Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a
 
 After that its gonna ask you to put on your device's UDID, Go to your compooter and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one that beside usbmux (example : 00001111-000A1100A11101A)
 
-<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/26f99e00-357a-420f-a536-95a2e4f905b5" alt="alt text" width="480" height="410">
-
 Now it's gonna ask you for SideJIT Server address! Just type in the address you use earlier to access device's UDID
 
 for example : `http://192.168.0.6:8080` (You must include the http and not include / at the end!)
 
-<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/efb42fbe-60cf-4532-ac19-aabefd8598b7" alt="alt text" width="480" height="465">
-
 Now run the shortcut!
 
 It gonna ask you to allow to access your local ip address just click allow!
-
-<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/57728a93-c144-4020-94c2-cdf71fee1060" alt="alt text" width="480" height="300">
 
 Now select the application that you want to give JIT access to and you're done! (might ask for notification. It is recommended that you allow so you see if the JIT fail or succeed)
 
