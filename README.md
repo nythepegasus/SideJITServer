@@ -1,27 +1,33 @@
 # SideJITServer
 This project allows you to start a server that wirelessly or via USB gives you JIT for iOS 17+ on Windows/macOS/Linux if you use the correct newer pymobiledevice3 version.
 
+## How to get this running (Run with Administrator!)
+```
+python3 -m venv venv # Run inside SideJITStore directory!
 
-To get it going: (run this in an admin terminal if you're on Windows)
-```sh
-python3 -m venv venv
+# Activate Python venv
 
-# If you're on macOS/Linux
+# macOS
 . ./venv/bin/activate
-# If you're on Windows using PowerShell
+
+# Windows but using Powershell
 .\venv\Scripts\Activate.ps1
-# CMD
+
+# Windows but using Command Prompt/CMD
 .\venv\Scripts\Activate.bat
 
-# All
+# Now let's install all the required packages! (Make sure you're still inside venv!)
+# All OS
 pip3 install -r requirements.txt
-# Windows
-.\venv\Scripts\python3.exe main.py
-# macOS/Linux
-sudo python3 -m SideJITServer --help
+pip3 install SideJITStore
+# If you got an error saying pip3 not found just change pip3 to pip
+
+# Let's see if everything works (Make sure you're still inside venv!)
+SideJITServer --version
+# Output should show SideJITServer!
 ```
 
-Or with PyPI:
+Or use PyPI
 ```
 python3 -m venv venv
 # Activate venv..
@@ -29,5 +35,32 @@ python3 -m venv venv
 pip3 install SideJITServer
 SideJITServer --help
 ```
+# How to use SideJITServer?
+- Make sure your device is connected!
+- Make sure you're still inside the venv!
+- Common Knowledge
+  
+Now run `SideJITServer --pair` and on your compooter make sure you click on Trust this compooter!
+Also it will show you a prompt to continue just type "y"
 
-Here is the [Shortcut](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) that goes along with this.
+Now thats done, Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) shortcut
+
+After that its gonna ask you to put on your device's UDID, Go to your compooter and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one that beside usbmux (example : 00001111-000A1100A11101A)
+
+<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/26f99e00-357a-420f-a536-95a2e4f905b5" alt="alt text" width="480" height="410">
+
+Now it's gonna ask you for SideJIT Server address! Just type in the address you use earlier to access device's UDID
+
+for example : `http://192.168.0.6:8080` (You must include the http and not include / at the end!)
+
+<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/efb42fbe-60cf-4532-ac19-aabefd8598b7" alt="alt text" width="480" height="465">
+
+Now run the shortcut!
+
+It gonna ask you to allow to access your local ip address just click allow!
+
+<img src="https://github.com/SenyxLois/SideJITServer/assets/133978434/57728a93-c144-4020-94c2-cdf71fee1060" alt="alt text" width="480" height="300">
+
+Now select the application that you want to give JIT access to and you're done! (might ask for notification. It is recommended that you allow so you see if the JIT fail or succeed)
+
+Happy JITing! :3
