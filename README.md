@@ -19,7 +19,7 @@ python3 -m venv venv # Run inside SideJITStore directory!
 # Now let's install all the required packages! (Make sure you're still inside venv!)
 # All OS
 pip3 install -r requirements.txt
-pip3 install SideJITStore
+pip3 install SideJITServer
 # If you got an error saying pip3 not found just change pip3 to pip
 
 # Let's see if everything works (Make sure you're still inside venv!)
