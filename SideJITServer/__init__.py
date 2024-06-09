@@ -262,7 +262,7 @@ signal.signal(signal.SIGINT, signal_handler)
 @click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
 @click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
 @click.option('-nz', '--nozeroconf', is_flag=True, default=False, help='this will not launch zeroconf so there will be no Auto IP')
-def start_server(verbose, timeout, port, debug, pair, version, tunnel):
+def start_server(verbose, timeout, port, debug, pair, version, tunnel, nozeroconf):
     if version:
         click.echo(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
         return
