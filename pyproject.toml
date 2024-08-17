@@ -10,7 +10,7 @@ maintainers = [
 ]
 description = "SideJITServer is an iOS 17 JIT enabler for Windows/macOS!"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 keywords = ["ios", "automation", "cli", "jit"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -21,6 +21,8 @@ classifiers = [
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: iOS",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
