@@ -2,6 +2,8 @@
 This project allows you to start a server that wirelessly or via USB gives you JIT for iOS 17+ on Windows/macOS/Linux if you use the correct newer pymobiledevice3 version.
 
 ## How to get this running (Run with Administrator!)
+
+### Option 1: Python install
 ```
 python3 -m venv venv # Run inside SideJITStore directory!
 
@@ -35,9 +37,18 @@ python3 -m venv venv
 pip3 install SideJITServer
 SideJITServer --help
 ```
+
+### Option 2: Direct download (if available)
+Go to the latest [GitHub Release](https://github.com/nythepegasus/SideJITServer/releases/latest) and check if there are executable downloads, such as `SideJITServer-windows-x86_64.exe`, depending on your OS and your architecture.
+
+Download the correct executable, and run it as Administrator from your terminal or Powershell following the directions below. If you are on Mac or Linux, you must first run `chmod +x ./(your downloaded .bin file)` before executing the file with sudo.
+
+Python is not necessary for this approach.
+
+
 # How to use SideJITServer?
 - Make sure your device is connected!
-- Make sure you're still inside the venv!
+- Make sure you're still inside the venv, if applicable!
 - Common Knowledge
   
 Now run `SideJITServer --pair` and on your PC make sure you click on Trust this PC!

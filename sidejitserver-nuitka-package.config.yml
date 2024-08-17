@@ -1,0 +1,18 @@
+# yamllint disable rule:line-length
+# yamllint disable rule:indentation
+# yamllint disable rule:comments-indentation
+# too many spelling things, spell-checker: disable
+---
+
+- module-name: 'pytun_pmd3'
+  dlls:
+    - from_filenames:
+        relative_path: 'wintun/bin/x86'
+        prefixes:
+          - 'wintun'
+      when: 'win32 and arch_x86'
+    - from_filenames:
+        relative_path: 'wintun/bin/amd64'
+        prefixes:
+          - 'wintun'
+      when: 'win32 and arch_amd64'

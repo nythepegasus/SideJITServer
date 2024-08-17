@@ -1,0 +1,75 @@
+name: Compile Executables
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false # needed to keep running other os builds even if one fails
+
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: # needed for tag info for nightly sdist builds
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # nuitka 2.2 does not support 3.12
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      # Install dependencies
+      - name: Install Dependencies and Build sdist
+        run: |
+          pip install -r requirements.txt
+          pip install -U build setuptools
+          python -m build # create the sdist build to populate the __version__ var
+
+      # Build python script into a standalone exe
+      - name: Build Executable
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: 2.2.3 # 2.3 does not work on mac for some reason
+          script-name: SideJITServer/launch.py
+
+      - name: Upload Compilation Report
+        if: always() # run even if the compile failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} compilation report
+          path: compilation-report.xml
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} Build
+          path: |
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
+
+      - name: Check if executable runs (.exe)
+        if: ${{ runner.os == 'Windows' }}
+        run: ./build/*.exe --version
+
+      - name: Check if executable runs (.bin)
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: ./build/*.bin --version

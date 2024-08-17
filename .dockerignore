@@ -31,3 +31,11 @@
 **/values.dev.yaml
 LICENSE
 README.md
+
+# nuitka
+*.bin
+*.exe
+*.build
+*.dist
+*.onefile_dist
+*compilation-report.xml

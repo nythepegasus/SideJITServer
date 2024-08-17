@@ -162,3 +162,11 @@ cython_debug/
 
 # macOS
 .DS_Store
+
+# nuitka
+*.bin
+*.exe
+*.build
+*.dist
+*.onefile_dist
+*compilation-report.xml
