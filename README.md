@@ -5,7 +5,7 @@ This project allows you to start a server that wirelessly or via USB gives you J
 
 ### Option 1: Python install
 ```
-python3 -m venv venv # Run inside SideJITStore directory!
+python3 -m venv venv # Run inside SideJITServer directory!
 
 # Activate Python venv
 
