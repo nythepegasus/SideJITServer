@@ -11,8 +11,10 @@ services:
     network_mode: host
     restart: unless-stopped
     volumes:
-#   make sure pair files are persistent 
-      - ../data/.pymobiledevice3:/root/.pymobiledevice3
+#   make sure pair files are persistent
+#   :z is a label that needed if you are runnning podman,
+#   which is a rewritten security enhanced alternatives to docker
+      - ../data/.pymobiledevice3:/root/.pymobiledevice3:z
 #   making sure usbmuxd running otherwise docker won't start for safety.
 #   If you not using usbmuxd just comment out next 3 lines
       - type: bind
@@ -23,5 +25,9 @@ services:
     cap_add:
 # Gives access to create tunnels
       - NET_ADMIN
+# Needed if you are using SElinux on a system, mostly RedHat/Fedora based distros
+    security_opt:
+      - "label:disable"
+
     command: SideJITServer --port 8080 -d -vv
 
