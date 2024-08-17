@@ -1,4 +1,5 @@
 import atexit
+import asyncio
 import click
 import socket
 import logging
@@ -120,7 +121,7 @@ def refresh_devs():
     devs = []
     for dev in get_tunneld_devices():
         try:
-            auto_mount_personalized(dev)
+            asyncio.run(auto_mount_personalized(dev))
         except AlreadyMountedError:
             pass
         devs.append(Device(dev, dev.name, dev.udid, []).refresh_apps())
@@ -170,7 +171,7 @@ def enable_jit_for_app(device, name):
 
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
-                         protocol=TunnelProtocol('quic'), usb_monitor=True, wifi_monitor=True)
+                         protocol=TunnelProtocol('quic'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
 
 def prompt_device_list(device_list: list):
     device_question = [inquirer3.List('device', message='choose device', choices=device_list, carousel=True)]
