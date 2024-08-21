@@ -11,5 +11,3 @@ Compilation lasts between 25-50 minutes depending on platform from an empty cach
 When making a release, wait for the compilation to finish, and then download + attach the executables to the release after the jobs are finished.
 
 If you want to compile it yourself on your own machine, study the launch.py file and the github workflow to understand how to do it, and change any configs as necessary to fit your machine architecture.
-
-Note: currently pinned to python 3.11 and nuitka 2.2.3 since nuitka 2.3 does not work on Mac.

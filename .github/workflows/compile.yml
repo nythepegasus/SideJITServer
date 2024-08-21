@@ -30,7 +30,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11' # nuitka 2.2 does not support 3.12
+          python-version: '3.12'
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
           cache: 'pip'
           cache-dependency-path: |
@@ -47,7 +47,7 @@ jobs:
       - name: Build Executable
         uses: Nuitka/Nuitka-Action@main
         with:
-          nuitka-version: 2.2.3 # 2.3 does not work on mac for some reason
+          nuitka-version: main
           script-name: SideJITServer/launch.py
 
       - name: Upload Compilation Report

@@ -19,10 +19,6 @@
 # nuitka-project-if: {OS} == "Darwin":
 #    nuitka-project: --output-filename=SideJITServer-mac-arm64.bin
 
-# nuitka-project: --include-module=zeroconf._utils.ipaddress
-# nuitka-project: --include-module=zeroconf._handlers.answers
-# nuitka-project: --include-module=pkg_resources.extern
-
 # nuitka-project: --report=compilation-report.xml
 
 from SideJITServer import start_server
