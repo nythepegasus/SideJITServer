@@ -1,12 +1,12 @@
 # SideJITServer
 This project allows you to start a server that wirelessly or via USB gives you JIT for iOS 17+ on Windows/macOS (Linux if you use the correct newer pymobiledevice3 version and are on iOS 17.4+)
 
-## How to get this running (Run with Administrator!)
-
 ## Prerequisites 
 
 - Python 3.10+ (All OS) you can download it from [here](https://www.python.org/downloads/) (Make sure you clicked "Add Python to PATH")
 - iTunes (Windows Only) download it from [here](https://www.apple.com/itunes/download/win64/)
+
+## How to get this running (Run with Administrator!)
 
 ## Option 1: PyPi Method 
 
@@ -41,7 +41,7 @@ SideJITServer --version
 # Output should show SideJITServer!
 ```
 
-### Option 2: Direct download (if available)
+## Option 2: Direct download (if available)
 Go to the latest [GitHub Release](https://github.com/nythepegasus/SideJITServer/releases/latest) and check if there are executable downloads, such as `SideJITServer-windows-x86_64.exe`, depending on your OS and your architecture.
 
 Download the correct executable, and run it as Administrator from your terminal or Powershell following the directions below. If you are on Mac or Linux, you must first run `chmod +x ./(your downloaded .bin file)` before executing the file with sudo.
