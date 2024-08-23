@@ -8,7 +8,7 @@ This project allows you to start a server that wirelessly or via USB gives you J
 
 ## How to get this running (Run with Administrator!)
 
-## Option 1: PyPi Method 
+### Option 1: PyPi Method 
 
 Open Terminal on Windows or macOS (you may need to use CMD on Windows) and run these commands:
 
@@ -41,7 +41,7 @@ SideJITServer --version
 # Output should show SideJITServer!
 ```
 
-## Option 2: Direct download (if available)
+### Option 2: Direct download (if available)
 Go to the latest [GitHub Release](https://github.com/nythepegasus/SideJITServer/releases/latest) and check if there are executable downloads, such as `SideJITServer-windows-x86_64.exe`, depending on your OS and your architecture.
 
 Download the correct executable, and run it as Administrator from your terminal or Powershell following the directions below. If you are on Mac or Linux, you must first run `chmod +x ./(your downloaded .bin file)` before executing the file with sudo.
