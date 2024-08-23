@@ -1,3 +1,2 @@
 pymobiledevice3>=4.11.20,<5.0.0
-Flask==3.0.2
 zeroconf==0.132.2

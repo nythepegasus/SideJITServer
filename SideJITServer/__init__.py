@@ -3,10 +3,12 @@ import asyncio
 import click
 import socket
 import logging
-import inquirer3
+import json
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+
 import multiprocessing
 from time import sleep
-from flask import Flask
 from zeroconf import ServiceInfo, Zeroconf
 
 from pymobiledevice3.remote.common import TunnelProtocol
@@ -23,8 +25,8 @@ from pymobiledevice3._version import __version__ as pymd_ver
 from SideJITServer._version import __version__
 
 
+
 devs = []
-app = Flask(__name__)
 logging.basicConfig(level=logging.WARNING)
 
 
@@ -115,7 +117,6 @@ class Device:
     def asdict(self):
         return {self.name: [a.asdict() for a in self.apps]}
 
-
 def refresh_devs():
     global devs
     devs = []
@@ -131,44 +132,42 @@ def get_device(udid: str):
     d = [d for d in devs if d.udid == udid]
     return None if len(d) != 1 else d[0]
 
-@app.route("/")
-def devices():
-    global devs
-    if len(devs) == 0:
-        return {"ERROR": "Could not find any device!"}
-    return {d.name: d.udid for d in devs}
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def _send_json_response(self, status_code, data):
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
 
-@app.route("/ver/")
-def route_version():
-    return {"pymobiledevice3": pymd_ver, "SideJITServer": __version__}
+    def do_GET(self):
+        parsed_path = urlparse(self.path)
+        path_parts = parsed_path.path.strip('/').split('/')
 
-@app.route("/re/")
-def refresh_devices():
-    refresh_devs()
-    return {"OK": "Refreshed!"}
+        status_code = 200
+        response = {}
 
-@app.route("/<device>/")
-def get_apps(device):
-    dev = get_device(device)
-    if dev:
-        return [a.asdict() for a in dev.apps]
-    return {"ERROR": "Could not find device!"}
+        match path_parts:
+            case ['']:
+                response = {d.name: d.udid for d in devs} if devs else {"ERROR": "Could not find any device!"}
+            case ['ver']:
+                response = {"pymobiledevice3": pymd_ver, "SideJITServer": __version__}
+            case ['re']:
+                refresh_devs()
+                response = {"OK": "Refreshed!"}
+            case [device_id] if device := get_device(device_id):
+                response = [a.asdict() for a in device.apps]
+            case [device_id, 're'] if device := get_device(device_id):
+                device.refresh_apps()
+                response = {"OK": "Refreshed app list!"}
+            case [device_id, action] if device := get_device(device_id):
+                result = device.enable_jit(action)
+                response = result
+            case _:
+                status_code = 404
+                response = {"ERROR": "Invalid path or could not find device!"}
 
-@app.route("/<device>/re/")
-def refresh_apps(device):
-    dev = get_device(device)
-    if dev is None:
-        return {"Error": "Could not find device!"}
-    dev.refresh_apps()
-    return {"OK": "Refreshed app list!"}
-
-@app.route("/<device>/<name>/")
-def enable_jit_for_app(device, name):
-    dev = get_device(device)
-    if dev is None:
-        return "Could not find device!"
-    return dev.enable_jit(name)
-
+        self._send_json_response(status_code, response)
+            
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
                          protocol=TunnelProtocol('quic'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
@@ -205,12 +204,22 @@ def create_service(port=8080):
 
     atexit.register(zeroconf.unregister_service, service_info)
     atexit.register(zeroconf.close)
+    
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
 
 @click.command()
 @click.option('-p', '--port', default=8080, help='Set the server port')
 @click.option('-e', '--version', is_flag=True, default=False, help='Prints the versions of pymobiledevice3 and SideJITServer')
 @click.option('-d', '--debug', is_flag=True, default=False, help='Enables debug output of the flask server')
-@click.option('-t', '--timeout', default=10, help='The number of seconds to wait for the pymd3 admin tunnel')
+@click.option('-t', '--timeout', default=5, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
 @click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
 @click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
@@ -241,15 +250,22 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     verbosity_level = min(len(log_levels) - 1, verbose)
     logging.getLogger().setLevel(log_levels[verbosity_level])
+
     if not tunnel:
         tunneld = multiprocessing.Process(target=start_tunneld_proc)
         tunneld.start()
-
-        atexit.register(tunneld.terminate)
-
         sleep(timeout)
 
     refresh_devs()
 
-    create_service()
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    create_service(port)
+    
+    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    local_ip = get_local_ip()
+    print(f"Server started on http://{local_ip}:{port}")
+    
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("Server stopped.")
+    
