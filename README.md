@@ -55,9 +55,10 @@ Python is not necessary for this approach.
 - Common Knowledge
   
 Now run `SideJITServer` and on your PC make sure you click on Trust this PC! 
+
 (after the first time you shouldnt need your Device to be plugged in only on the same Wi-Fi Network or Over Ethernet)
 
-Now thats done, If you use SideStore (you will need to be on the [Nightly](https://github.com/SideStore/SideStore/releases/tag/nightly)) then you do not need all this, it should automatically detect it. if not then you will need to input the SideJITServer address into SideStore Settings (it will be on t.
+Now thats done, If you use SideStore (you will need to be on the [Nightly](https://github.com/SideStore/SideStore/releases/tag/nightly)) then you do not need all this, it should automatically detect it. if not then you will need to input the SideJITServer address into SideStore Settings
 
 If you do not use SideStore continue, Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) shortcut
 
