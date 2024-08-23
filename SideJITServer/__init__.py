@@ -133,71 +133,40 @@ def get_device(udid: str):
     return None if len(d) != 1 else d[0]
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def _send_json_response(self, status_code, data):
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
     def do_GET(self):
         parsed_path = urlparse(self.path)
         path_parts = parsed_path.path.strip('/').split('/')
 
-        if len(path_parts) == 0 or path_parts[0] == '':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            response = {d.name: d.udid for d in devs} if devs else {"ERROR": "Could not find any device!"}
-            self.wfile.write(json.dumps(response).encode())
-        elif path_parts[0] == 'ver':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            response = {"pymobiledevice3": pymd_ver, "SideJITServer": __version__}
-            self.wfile.write(json.dumps(response).encode())
-        elif path_parts[0] == 're':
-            refresh_devs()
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"OK": "Refreshed!"}).encode())
-        elif len(path_parts) == 1:
-            device = get_device(path_parts[0])
-            if device:
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps([a.asdict() for a in device.apps]).encode())
-            else:
-                self.send_response(404)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"ERROR": "Could not find device!"}).encode())
-        elif len(path_parts) == 2 and path_parts[1] == 're':
-            device = get_device(path_parts[0])
-            if device:
+        status_code = 200
+        response = {}
+
+        match path_parts:
+            case ['']:
+                response = {d.name: d.udid for d in devs} if devs else {"ERROR": "Could not find any device!"}
+            case ['ver']:
+                response = {"pymobiledevice3": pymd_ver, "SideJITServer": __version__}
+            case ['re']:
+                refresh_devs()
+                response = {"OK": "Refreshed!"}
+            case [device_id] if device := get_device(device_id):
+                response = [a.asdict() for a in device.apps]
+            case [device_id, 're'] if device := get_device(device_id):
                 device.refresh_apps()
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"OK": "Refreshed app list!"}).encode())
-            else:
-                self.send_response(404)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"Error": "Could not find device!"}).encode())
-        elif len(path_parts) == 2:
-            device = get_device(path_parts[0])
-            if device:
-                result = device.enable_jit(path_parts[1])
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(result)
-            else:
-                self.send_response(404)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"ERROR": "Could not find device!"}).encode())
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"ERROR": "Invalid path"}).encode())
+                response = {"OK": "Refreshed app list!"}
+            case [device_id, action] if device := get_device(device_id):
+                result = device.enable_jit(action)
+                response = result
+            case _:
+                status_code = 404
+                response = {"ERROR": "Invalid path or could not find device!"}
+
+        self._send_json_response(status_code, response)
             
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
