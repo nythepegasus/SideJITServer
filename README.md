@@ -8,7 +8,7 @@ This project allows you to start a server that wirelessly or via USB gives you J
 - Python 3.10+ (All OS) you can download it from [here](https://www.python.org/downloads/) (Make sure you clicked "Add Python to PATH")
 - iTunes (Windows Only) download it from [here](https://www.apple.com/itunes/download/win64/)
 
-### Option 1: PyPi Method 
+## Option 1: PyPi Method 
 
 Open Terminal on Windows or macOS (you may need to use CMD on Windows) and run these commands:
 
