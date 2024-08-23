@@ -14,6 +14,8 @@ Open Terminal on Windows or macOS (you may need to use CMD on Windows) and run t
 
 ```
 # Now you need to run these commands (not the ones with the #):
+
+# Setup venv
 python3 -m venv venv 
 
 # Now we need to Activate it
