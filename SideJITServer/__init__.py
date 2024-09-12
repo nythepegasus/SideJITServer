@@ -168,7 +168,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     status_code = 511
                     response = {"ERROR": "Did you forget to enable the debug flag?"}
                 else:
-                    response = device.all_apps
+                    response = [a.asdict() for a in device.all_apps]
             case [device_id, 're'] if device := get_device(device_id):
                 device.refresh_apps()
                 response = {"OK": "Refreshed app list!"}
