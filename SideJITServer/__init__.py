@@ -45,19 +45,23 @@ class App:
         return {"name": self.name, "bundle": self.bundle, "pid": self.pid}
 
 class Device:
-    __slots__ = ('handle', 'name', 'udid', 'apps')
+    __slots__ = ('handle', 'name', 'udid', 'apps', 'all_apps')
 
-    def __init__(self, handle, name: str, udid: str, apps: list[App]):
+    def __init__(self, handle, name: str, udid: str, apps: list[App], all_apps: list[App] | None = None):
         self.handle = handle
         self.name = name
         self.udid = udid
         self.apps = apps
+        self.all_apps = all_apps
 
     def __repr__(self):
         return f"Device<'{self.udid}', {self.apps}>"
 
     def refresh_apps(self) -> "Device":
         apps = InstallationProxyService(lockdown=self.handle).get_apps()
+        if isinstance(self.all_apps, list):
+            all_apps = {apps[app]['CFBundleDisplayName']: app for app in apps}
+            self.all_apps = [App(name, bundle) for name, bundle in all_apps.items()]
         apps = {apps[app]['CFBundleDisplayName']: app for app in apps if 'Entitlements' in apps[app]
                 and 'get-task-allow' in apps[app]['Entitlements'] and apps[app]['Entitlements']['get-task-allow']}
         self.apps = [App(name, bundle) for name, bundle in apps.items()]
@@ -117,7 +121,7 @@ class Device:
     def asdict(self):
         return {self.name: [a.asdict() for a in self.apps]}
 
-def refresh_devs():
+def refresh_devs(enable_all_apps: bool = False):
     global devs
     devs = []
     for dev in get_tunneld_devices():
@@ -125,7 +129,7 @@ def refresh_devs():
             asyncio.run(auto_mount_personalized(dev))
         except AlreadyMountedError:
             pass
-        devs.append(Device(dev, dev.name, dev.udid, []).refresh_apps())
+        devs.append(Device(dev, dev.name or "???", dev.udid or "???", [], [] if enable_all_apps else None).refresh_apps())
 
 def get_device(udid: str):
     global devs
@@ -133,6 +137,8 @@ def get_device(udid: str):
     return None if len(d) != 1 else d[0]
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    ENABLE_SHOW_INSTALLED = False
+
     def _send_json_response(self, status_code, data):
         self.send_response(status_code)
         self.send_header('Content-type', 'application/json')
@@ -156,6 +162,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 response = {"OK": "Refreshed!"}
             case [device_id] if device := get_device(device_id):
                 response = [a.asdict() for a in device.apps]
+            case [device_id, 'all_apps'] if device := get_device(device_id):
+                device.refresh_apps()
+                if not self.ENABLE_SHOW_INSTALLED:
+                    status_code = 511
+                    response = {"ERROR": "Did you forget to enable the debug flag?"}
+                else:
+                    response = device.all_apps
             case [device_id, 're'] if device := get_device(device_id):
                 device.refresh_apps()
                 response = {"OK": "Refreshed app list!"}
@@ -219,11 +232,12 @@ def get_local_ip():
 @click.option('-p', '--port', default=8080, help='Set the server port')
 @click.option('-e', '--version', is_flag=True, default=False, help='Prints the versions of pymobiledevice3 and SideJITServer')
 @click.option('-d', '--debug', is_flag=True, default=False, help='Enables debug output of the flask server')
+@click.option('-i', '--show-installed', is_flag=True, default=False, help='Enables the debug route of all installed apps for the web server')
 @click.option('-t', '--timeout', default=5, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
 @click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
 @click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
-def start_server(verbose, timeout, port, debug, pair, version, tunnel):
+def start_server(verbose, timeout, port, debug, show_installed, pair, version, tunnel):
     if version:
         click.echo(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
         return
@@ -256,10 +270,11 @@ def start_server(verbose, timeout, port, debug, pair, version, tunnel):
         tunneld.start()
         sleep(timeout)
 
-    refresh_devs()
+    refresh_devs(show_installed)
 
     create_service(port)
     
+    SimpleHTTPRequestHandler.ENABLE_SHOW_INSTALLED = show_installed
     server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
     local_ip = get_local_ip()
     print(f"Server started on http://{local_ip}:{port}")
