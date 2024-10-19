@@ -196,7 +196,7 @@ def prompt_device_list(device_list: list):
 def create_service(port=8080):
     # Get local IP address
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
+    s.connect(("1.1.1.1", 80))
     ip_address = s.getsockname()[0]
     s.close()
 
@@ -221,7 +221,7 @@ def create_service(port=8080):
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
+        s.connect(("1.1.1.1", 80))
         ip = s.getsockname()[0]
         s.close()
         return ip
