@@ -4,7 +4,7 @@ This project allows you to start a server that wirelessly or via USB gives you J
 ## How to get this running (Run with Administrator!)
 
 ### Option 1: Python install
-```
+```sh
 python3 -m venv venv # Run inside SideJITServer directory!
 
 # Activate Python venv
@@ -30,7 +30,7 @@ SideJITServer --version
 ```
 
 Or use PyPI
-```
+```sh
 python3 -m venv venv
 # Activate venv..
 
@@ -54,18 +54,38 @@ Python is not necessary for this approach.
 Now run `SideJITServer --pair` and on your PC make sure you click on Trust this PC!
 Also it will show you a prompt to continue just type "y"
 
-Now thats done, Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) shortcut
+### Usage
 
-After that its gonna ask you to put on your device's UDID, Go to your PC and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one that beside usbmux (example : 00001111-000A1100A11101A)
+#### MacOS
 
-Now it's gonna ask you for SideJIT Server address! Just type in the address you use earlier to access device's UDID
+##### 1. Run the server
 
-for example : `http://192.168.0.6:8080` (You must include the http and not include / at the end!)
+```sh
+# First run
+sudo SideJITServer --pair
+# Consecutive runs once paired
+sudo SideJITServer
+```
+
+You should see an output similar to this.
+
+<img width="602" alt="image" src="https://github.com/user-attachments/assets/fef15573-5a51-4a20-ada3-074f1c7f9765">
+
+##### 2. Install / Run the shortcut
+
+<b><p align="center">Install [this](https://www.icloud.com/shortcuts/b0ffc9c3f0e74e7a8f8052c89fa322cf) shortcut❗</p></b>
+
+After that it's going ask you to put on your device's UDID, Go to your PC and see your local ipaddress mine is `192.168.0.6:8080` and on your phone go to that (your local address) and copy the one beside `usbmux` (example : `00001111-000A1100A11101A`)
+
+Now it's gonna ask you for `SideJIT` Server address! Just type in the address you used earlier to access the device's UDID
+
+for example : `http://192.168.0.6:8080` <b>(You must include the http and not include / at the end!)</b>
 
 Now run the shortcut!
 
-It gonna ask you to allow to access your local ip address just click allow!
+It going to ask you to allow to access your local ip address just click allow!
 
-Now select the application that you want to give JIT access to and you're done! (might ask for notification. It is recommended that you allow so you see if the JIT fail or succeed)
+Now select the application that you want to give JIT access to and you're done! (it might ask for notification permissions). 
+It is recommended that you allow so you see if the JIT fail or succeed.
 
 Happy JITing! :3
