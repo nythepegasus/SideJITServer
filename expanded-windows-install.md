@@ -175,10 +175,18 @@ iii. I decided to use the newest stable python, 3.13. ```pyenv install 3.13``` i
 iv. Time for a fat install. You need to download the MS Visual Studio .exe from [here](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022). Download the free community version.
 
 v. Run the .exe. Once it loads up you have to tell the program which components to install:
-    1. Under the first tab, "Workloads", Check the box for "Desktop development with C++"
-    2. On the right side there should be a checklist of things you are installing and are available. Make sure to also check the box for "Windows 11 SDK" (or Windows 10 if using that). It may already be check marked. If so, good, move on.
-    3. The size should be over 3GB if you've never installed anything from Visual Studio build tools before. 
-    4. Just hit install (The "install while downloading" option is default and probably best to leave that on to speed things up)
-    5. Restarting is optional, but best to just do it.
+
+1. Under the first tab, "Workloads", Check the box for "Desktop development with C++"
+   
+2. On the right side there should be a checklist of things you are installing and are available. Make sure to also check the box for "Windows 11 SDK" (or Windows 10 if using that). It may already be check marked. If so, good, move on.
+
+3. Here is what it looks like before hitting install (mine was already installed thus 0GB). The size should be over 3GB if you've never installed anything from Visual Studio build tools before.
+
+![Screenshot 2024-11-22 120104](https://github.com/user-attachments/assets/c4bca988-580e-48f0-8a18-da74e717079f)
+    
+4. Just hit install (The "install while downloading" option is default and probably best to leave that on to speed things up)
+    
+5. Restarting is optional, but best to just do it.
 
 vi. That's it. The rest of the guide is the same. With the newest python installed and the build tools installed, SideJITServer should reinstall fine. Then you just run SideJITServer the same as you did before but now it will be running with python 13.3. This cleared up issues for me and also confirmed that python 13.3 works with this version of SideJITServer.
+
