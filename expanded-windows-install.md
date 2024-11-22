@@ -1,7 +1,9 @@
 # "Dummy-proof" Installation
 
 Made this for myself (I make notes so I don't go crazy every time I reinstall things...) and Adapted for generic use.
-If desired, I can add some pics (perhaps even with visual aids) and put it up in a repo of my own or something. My goal is just to make this as a easy as possible for people (and myself!). So if anyone has feedback, let me know. 
+If desired, I can add some pics (perhaps even with visual aids) and put it up in a repo of my own or something. My goal is just to make this as a easy as possible for people (and myself!). So if anyone has feedback, let me know.
+
+**Note** I added some [changes](#update-22-nov-2024) at the bottom. TL;DR: Updated to Python v13.3 to solve some errors I was getting. Check it out!
 
 ## Part I
 
@@ -156,7 +158,8 @@ Now select the application that you want to give JIT access to and you're done! 
 
 Happy JITing! :3"
 
-**Update 22-Nov-2024**
+## Update 22-Nov-2024
+
 I updated my phone/iPad to iOS/iPadOS 18.1.1 and was encountering some errors such as device "network lost" on the devices when trying to enable JIT. I also recently, since initially piecing together this guide, changed my home network. Some combo of these events was causing me errors and I couldn't get it to work. So, I chose the nuclear option... 
 
 **WARNING** When you use Python 3.13 Windows will also require you to install Microsoft Visual C++ (MSVC) build tools. This is a MASSIVE install! 3GB, minimum! This is required because you have to literally build, yourself, part of the requirements for this project. With lower python versions other builds exist for certain things. If you use newer versions, this isn't always the case. So, you must build yourself. It takes longer and takes up disk space. This is Microsoft's fault because they don't seem to want people only installing SOME of the build tools... they want the whole thing. Just letting you know now.
