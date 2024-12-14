@@ -5,6 +5,10 @@ If desired, I can add some pics (perhaps even with visual aids) and put it up in
 
 **Note** I added some [changes](#update-22-nov-2024) at the bottom. TL;DR: Updated to Python v13.3 to solve some errors I was getting. Check it out!
 
+**Note-2** I added more information related to [using SideJITServer after an iOS Update](#update-14-dec-2024). 
+
+**As of 14 Dec, 2024, using this guide, including the two notes above, SideJITServer works on iOS/iPadOS 18.2 (iPhone 16 Pro/iPad Pro 11" Gen 3)**
+
 ## Part I
 
 ### Python Pre-Install Notes 
@@ -190,3 +194,27 @@ v. Run the .exe. Once it loads up you have to tell the program which components 
 
 vi. That's it. The rest of the guide is the same. With the newest python installed and the build tools installed, SideJITServer should reinstall fine. Then you just run SideJITServer the same as you did before but now it will be running with python 13.3. This cleared up issues for me and also confirmed that python 13.3 works with this version of SideJITServer.
 
+## Update 14-Dec-2024
+
+**Quick Setup Again After iOS Update**
+
+For some reason, after an iOS update, the program throws a bunch of errors. There may be a more efficient solution here, but I've foundd the *easiest* solution is nuking the install and re-install.
+
+### Preparation 
+
+1. Find and delete any mention of iDevices and SideJITServer. I HIGHLY recommend [Everything](https://www.voidtools.com/)+[EverythingToolbar](https://github.com/srwi/EverythingToolbar) for this task and in general. The built-in Windows 10/11 search... isn't great. This tool is a big improvement. (Totally free as well) 
+2. Download newest SideJITServer from [releases](https://github.com/nythepegasus/SideJITServer/releases)
+
+### Quick Instructions
+
+1. Extract release to ```C:\Users\USERNAME\SideJITServer```
+2. Change directory ```cd C:\Users\USERNAME\SideJITServer```
+3. Setup venv ```python3 -m venv venv```
+4. Activate ```.\venv\Scripts\Activate.bat```
+5. Install packages ```pip3 install -r requirements.txt```
+6. Install SideJITServer ```pip3 install SideJITServer```
+7. Check install is working ```SideJITServer --version```
+
+Continue following [Guide: Part III](#part-iii)
+
+Everything should be working again.
