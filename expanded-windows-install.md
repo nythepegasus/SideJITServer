@@ -1,9 +1,6 @@
 # "Dummy-proof" Installation
 
-Made this for myself (I make notes so I don't go crazy every time I reinstall things...) and Adapted for generic use.
-If desired, I can add some pics (perhaps even with visual aids) and put it up in a repo of my own or something. My goal is just to make this as a easy as possible for people (and myself!). So if anyone has feedback, let me know.
-
-**Note** I added some [changes](#update-22-nov-2024) at the bottom. TL;DR: Updated to Python v13.3 to solve some errors I was getting. Check it out!
+**Note-1** I added some [changes](#update-22-nov-2024) at the bottom. TL;DR: Updated to Python v13.3 to solve some errors I was getting. Check it out!
 
 **Note-2** I added more information related to [using SideJITServer after an iOS Update](#update-14-dec-2024). 
 
@@ -198,7 +195,7 @@ vi. That's it. The rest of the guide is the same. With the newest python install
 
 **Quick Setup Again After iOS Update**
 
-For some reason, after an iOS update, the program throws a bunch of errors. There may be a more efficient solution here, but I've foundd the *easiest* solution is nuking the install and re-install.
+For some reason, after an iOS update, the program throws a bunch of errors. There may be a more efficient solution here, but I've found the *easiest* solution is nuking the install and re-install.
 
 ### Preparation 
 
