@@ -2,10 +2,10 @@
 
 # Make executable standalone
 # nuitka-project-if: {OS} in ("Windows", "Linux", "Darwin", "FreeBSD"):
-#    nuitka-project: --onefile
+#    nuitka-project: --mode=onefile
 #    nuitka-project: --onefile-tempdir-spec="{CACHE_DIR}/SideJITServer"
 # nuitka-project-else:
-#    nuitka-project: --standalone
+#    nuitka-project: --mode=standalone
 
 # nuitka-project-if: {OS} == "Windows":
 #    nuitka-project: --output-filename=SideJITServer-windows-x86_64.exe
