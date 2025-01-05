@@ -246,7 +246,7 @@ def write_pairing(dir, udid):
 @click.option('-T', '--timeout', default=5, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
 @click.option('-p', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
-@click.option('-f', '--file', default='./', help='Directory to output pairing file to')
+@click.option('-f', '--file', default=None, help='Directory to output pairing file to')
 @click.option('-t', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
 def start_server(verbose, timeout, port, show_installed, pair, version, file, tunnel):
     global devs
