@@ -184,7 +184,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
-                         protocol=TunnelProtocol('quic'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
+                         protocol=TunnelProtocol('tcp'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
 
 def prompt_device_list(device_list: list):
     device_question = [inquirer3.List('device', message='choose device', choices=device_list, carousel=True)]
