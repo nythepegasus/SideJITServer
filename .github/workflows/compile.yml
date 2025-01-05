@@ -49,6 +49,7 @@ jobs:
         with:
           nuitka-version: main
           script-name: SideJITServer/launch.py
+          mode: onefile
 
       - name: Upload Compilation Report
         if: always() # run even if the compile failed
@@ -64,7 +65,7 @@ jobs:
           path: |
             build/*.exe
             build/*.bin
-            build/*.app/**/*
+            # build/*.app/**/*
 
       - name: Check if executable runs (.exe)
         if: ${{ runner.os == 'Windows' }}

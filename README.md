@@ -39,7 +39,7 @@ SideJITServer --help
 ```
 
 ### Option 2: Direct download (if available)
-Go to the latest [GitHub Release](https://github.com/nythepegasus/SideJITServer/releases/latest) and check if there are executable downloads, such as `SideJITServer-windows-x86_64.exe`, depending on your OS and your architecture.
+Go to the latest [GitHub Release](https://github.com/nythepegasus/SideJITServer/releases/latest) and check if there are executable downloads, such as `SideJITServer-windows-x86_64.exe`, depending on your OS and your architecture. If there is no attached executable, you might find one in the [GitHub Actions](https://github.com/nythepegasus/SideJITServer/actions/workflows/compile.yml?query=is%3Asuccess) if a recent build worked and did not expire.
 
 Download the correct executable, and run it as Administrator from your terminal or Powershell following the directions below. If you are on Mac or Linux, you must first run `chmod +x ./(your downloaded .bin file)` before executing the file with sudo.
 
