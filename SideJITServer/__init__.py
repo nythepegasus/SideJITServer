@@ -4,6 +4,7 @@ import click
 import socket
 import logging
 import json
+import plistlib
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -11,10 +12,12 @@ import multiprocessing
 from time import sleep
 from zeroconf import ServiceInfo, Zeroconf
 
+from pymobiledevice3.cli.cli_common import inquirer3
+from pymobiledevice3.common import get_home_folder
 from pymobiledevice3.remote.common import TunnelProtocol
 from pymobiledevice3.exceptions import AlreadyMountedError
 from pymobiledevice3.usbmux import select_devices_by_connection_type
-from pymobiledevice3.lockdown import LockdownClient, create_using_usbmux
+from pymobiledevice3.lockdown import UsbmuxLockdownClient, create_using_usbmux
 from pymobiledevice3.services.installation_proxy import InstallationProxyService
 from pymobiledevice3.services.mobile_image_mounter import auto_mount_personalized
 from pymobiledevice3.services.dvt.instruments.process_control import ProcessControl
@@ -184,9 +187,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             
 def start_tunneld_proc():
     TunneldRunner.create(TUNNELD_DEFAULT_ADDRESS[0], TUNNELD_DEFAULT_ADDRESS[1],
-                         protocol=TunnelProtocol('quic'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
+                         protocol=TunnelProtocol('tcp'), mobdev2_monitor=True, usb_monitor=True, wifi_monitor=True, usbmux_monitor=True)
 
-def prompt_device_list(device_list: list):
+def prompt_device_list(device_list: list[UsbmuxLockdownClient]) -> UsbmuxLockdownClient:
     device_question = [inquirer3.List('device', message='choose device', choices=device_list, carousel=True)]
     try:
         result = inquirer3.prompt(device_question, raise_keyboard_interrupt=True)
@@ -230,20 +233,24 @@ def get_local_ip():
         return "127.0.0.1"
 
 @click.command()
-@click.option('-p', '--port', default=8080, help='Set the server port')
-@click.option('-e', '--version', is_flag=True, default=False, help='Prints the versions of pymobiledevice3 and SideJITServer')
-@click.option('-d', '--debug', is_flag=True, default=False, help='Enables debug output of the flask server')
+@click.option('-P', '--port', default=8080, help='Set the server port')
+@click.option('-V', '--version', is_flag=True, default=False, help='Prints the versions of pymobiledevice3 and SideJITServer')
 @click.option('-i', '--show-installed', is_flag=True, default=False, help='Enables the debug route of all installed apps for the web server')
-@click.option('-t', '--timeout', default=5, help='The number of seconds to wait for the pymd3 admin tunnel')
+@click.option('-T', '--timeout', default=5, help='The number of seconds to wait for the pymd3 admin tunnel')
 @click.option('-v', '--verbose', default=0, count=True, help='Increase verbosity (-v for INFO, -vv for DEBUG)')
-@click.option('-y', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
-@click.option('-n', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
-def start_server(verbose, timeout, port, debug, show_installed, pair, version, tunnel):
+@click.option('-p', '--pair', is_flag=True, default=False, help='Alternate pairing mode, will wait to pair to 1 device')
+@click.option('-f', '--file', default=None, help='File to output pairing file to')
+@click.option('-t', '--tunnel', is_flag=True, default=False, help='This will not launch the tunnel task! You must manually start it')
+def start_server(verbose, timeout, port, show_installed, pair, version, file, tunnel):
+    global devs
     if version:
         click.echo(f"pymobiledevice3: {pymd_ver}" + "\n" + f"SideJITServer: {__version__}")
         return
 
-    if pair:
+    if file or pair:
+        if file:
+            print(file)
+            devices = select_devices_by_connection_type(connection_type="Network")
         click.echo("Attempting to pair to a device! (Ctrl+C to stop)")
         devices = select_devices_by_connection_type(connection_type='USB')
         while len(devices) == 0:
@@ -252,15 +259,24 @@ def start_server(verbose, timeout, port, debug, show_installed, pair, version, t
             sleep(3)
 
         create_using_usbmux()
-        devices = [create_using_usbmux(serial=device.serial, autopair=False) for device in devices]
+        devs = [create_using_usbmux(serial=device.serial, autopair=False) for device in devices]
         print(devices)
         if len(devices) > 1:
-            dev = prompt_device_list(devices)
+            dev = prompt_device_list(devs)
         else:
-            dev = devices[0]
+            dev = devs[0]
         dev.pair()
+        if file:
+            with open(get_home_folder() / f"{dev.identifier}.plist", 'rb') as f:
+                data = plistlib.load(f)
+                data["UDID"] = dev.identifier
+                with open(file, "wb") as f:
+                    plistlib.dump(data, f, fmt=plistlib.FMT_XML)
+
         if "y" not in input("Continue? [y/N]: ").lower():
             return
+
+
 
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     verbosity_level = min(len(log_levels) - 1, verbose)
