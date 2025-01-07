@@ -7,6 +7,7 @@ import json
 import plistlib
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from sys import exit
 
 import multiprocessing
 from time import sleep
